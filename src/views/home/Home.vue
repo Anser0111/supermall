@@ -43,7 +43,7 @@ import Scroll from "components/common/scroll/Scroll.vue";
 import BackTop from "components/content/backTop/BackTop.vue";
 
 import { getHomeMultidata, getHomeGoods } from "network/home";
-import { debounce } from "common/utils";
+import { itemListenerMixin } from "common/mixin";
 
 export default {
   components: {
@@ -73,6 +73,7 @@ export default {
       saveY: 0,
     };
   },
+  mixins: [itemListenerMixin],
   computed: {
     showGoods() {
       return this.goods[this.currentType].list;
@@ -83,7 +84,10 @@ export default {
     this.$refs.scroll.refresh();
   },
   deactivated() {
+    // 1.保存Y值
     this.saveY = this.$refs.scroll.getScrollY();
+    // 2.取消全局时间的监听
+    this.$bus.$off("itemImaLoad", this.itemImgListener);
   },
   created() {
     // 1.请求多个数据
@@ -94,17 +98,7 @@ export default {
     this.getHomeGoods("sell");
   },
 
-  mounted() {
-    // 1.监听item中图片加载完成
-    // 如果在created中监听，会概率出现bug：
-    // 有可能在回调前，scroll为null，导致无法调用refresh
-
-    const refresh = debounce(this.$refs.scroll.refresh, 50);
-
-    this.$bus.$on("itemImageLoad", () => {
-      refresh();
-    });
-  },
+  mounted() {},
   methods: {
     /**
      * 事件监听相关的方法
