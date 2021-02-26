@@ -1,17 +1,22 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detail-nav"></detail-nav-bar>
-    <scroll class="content" ref="scroll">
-      <detail-swiper :top-images="topImages"></detail-swiper>
-      <detail-base-info :goods="goods"></detail-base-info>
-      <detail-shop-info :shop="shop"></detail-shop-info>
+    <detail-nav-bar class="detail-nav" @titleClick="titleClick" ref="nav" />
+    <scroll
+      class="content"
+      ref="scroll"
+      @scroll="contentscroll"
+      :probe-type="3"
+    >
+      <detail-swiper :top-images="topImages" />
+      <detail-base-info :goods="goods" />
+      <detail-shop-info :shop="shop" />
       <detail-goods-info
         :detail-info="detailInfo"
         @detailImageLoad="detailImageLoad"
-      ></detail-goods-info>
-      <detail-param-info :paramInfo="paramInfo"></detail-param-info>
-      <detail-comment-info :commentInfo="commentInfo"></detail-comment-info>
-      <goods-list :goods="recommends"></goods-list>
+      />
+      <detail-param-info ref="params" :paramInfo="paramInfo" />
+      <detail-comment-info ref="comment" :commentInfo="commentInfo" />
+      <goods-list ref="recommend" :goods="recommends" />
     </scroll>
   </div>
 </template>
@@ -37,6 +42,7 @@ import {
 } from "network/detail";
 
 import { itemListenerMixin } from "common/mixin";
+import { debounce } from "common/utils";
 
 export default {
   name: "Detail",
@@ -62,6 +68,9 @@ export default {
       paramInfo: {},
       commentInfo: {},
       recommends: [],
+      themeTopYs: [],
+      getThemeTopY: null,
+      currentIndex: 0,
     };
   },
   created() {
@@ -98,19 +107,84 @@ export default {
       if (data.rate.cRate !== 0) {
         this.commentInfo = data.rate.list[0];
       }
+
+      // 1.第一次获取，获取到数据再回调，不行。
+      // 原因是$el还没渲染（即DOM还没渲染）
+      // this.themeTopYs = [];
+      // this.themeTopYs.push(0);
+      // this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+      // this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+      // this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+      // console.log(this.themeTopYs);
+
+      this.$nextTick(() => {
+        // 第二次获取，值不对。
+        // 原因是只渲染了DOM，图片还没渲染完。
+        // 根据最新的数据，对应的DOM是已经被渲染出来的
+        // 但图片大概率还没加载完
+        // offsetTop值不对的时候，极大概率是因为图片需要时间加载的问题。
+        // this.themeTopYs = [];
+        // this.themeTopYs.push(0);
+        // this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+        // this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+        // this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+        // console.log(this.themeTopYs);
+      });
     });
 
     // 3.请求推荐数据
     getRecommend().then((res) => {
       this.recommends = res.data.list;
     });
+
+    // 4.给getThemeTopY赋值（使用防抖）
+    this.getThemeTopY = debounce(() => {
+      this.themeTopYs = [];
+      this.themeTopYs.push(0);
+      this.themeTopYs.push(this.$refs.params.$el.offsetTop);
+      this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
+      this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
+      console.log(this.themeTopYs);
+    }, 100);
   },
   methods: {
     detailImageLoad() {
-      this.refresh()
+      this.refresh();
+
+      this.getThemeTopY();
+    },
+    titleClick(index) {
+      console.log(index);
+      this.$refs.scroll.scrollTo(0, -this.themeTopYs[index], 200);
+    },
+    contentscroll(position) {
+      const positionY = -position.y;
+
+      for (let i in this.themeTopYs) {
+        i = parseInt(i);
+        let length = this.themeTopYs.length;
+        // if (
+        //   positionY > this.themeTopYs[i] &&
+        //   positionY < this.themeTopYs[i + 1]
+        // ) {
+        //   console.log(i);
+        // }
+        if (
+          this.currentIndex !== i &&
+          ((i < length - 1 &&
+            positionY >= this.themeTopYs[i] &&
+            positionY < this.themeTopYs[i + 1]) ||
+            (i === length - 1 && positionY >= this.themeTopYs[i]))
+        ) {
+          this.currentIndex = i;
+          console.log(this.currentIndex);
+          this.$refs.nav.currentIndex = this.currentIndex;
+        }
+      }
     },
   },
   mounted() {},
+
   destroyed() {
     this.$bus.$off("itemImgLoad", this.itemImgListener);
   },
