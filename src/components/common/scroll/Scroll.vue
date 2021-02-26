@@ -61,6 +61,7 @@ export default {
       // 这样避免了这个bug的出现。
       // console.log("防抖处理");
       this.scroll && this.scroll.refresh();
+      // console.log("-----")
     },
     finishPullUp() {
       this.scroll && this.scroll.finishPullUp();

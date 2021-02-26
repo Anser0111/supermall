@@ -7,7 +7,7 @@
       <detail-shop-info :shop="shop"></detail-shop-info>
       <detail-goods-info
         :detail-info="detailInfo"
-        @imageLoad="imageLoad"
+        @detailImageLoad="detailImageLoad"
       ></detail-goods-info>
       <detail-param-info :paramInfo="paramInfo"></detail-param-info>
       <detail-comment-info :commentInfo="commentInfo"></detail-comment-info>
@@ -105,14 +105,14 @@ export default {
       this.recommends = res.data.list;
     });
   },
+  methods: {
+    detailImageLoad() {
+      this.refresh()
+    },
+  },
   mounted() {},
   destroyed() {
     this.$bus.$off("itemImgLoad", this.itemImgListener);
-  },
-  methods: {
-    imageLoad() {
-      this.$refs.scroll.refresh();
-    },
   },
 };
 </script>
