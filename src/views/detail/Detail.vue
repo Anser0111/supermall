@@ -7,7 +7,6 @@
       @scroll="contentscroll"
       :probe-type="3"
     >
-    <!-- <div>{{ $store.state.cartList.length }}</div> -->
       <detail-swiper :top-images="topImages" />
       <detail-base-info :goods="goods" />
       <detail-shop-info :shop="shop" />
@@ -192,6 +191,11 @@ export default {
 
       this.$store.dispatch("addCart", product);
     },
+  },
+  mounted() {},
+
+  destroyed() {
+    this.$bus.$off("itemImgLoad", this.itemImgListener);
   },
   mounted() {},
 
