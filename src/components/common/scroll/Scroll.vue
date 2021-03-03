@@ -37,6 +37,7 @@ export default {
     if (this.probeType === 2 || this.probeType === 3) {
       this.scroll.on("scroll", (positon) => {
         this.$emit("scroll", positon);
+        // console.log(positon);
       });
     }
 

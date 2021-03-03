@@ -86,8 +86,8 @@ export default {
   deactivated() {
     // 1.保存Y值
     this.saveY = this.$refs.scroll.getScrollY();
-    // 2.取消全局时间的监听
-    this.$bus.$off("itemImaLoad", this.itemImgListener);
+    // 2.取消全局事件的监听
+    this.$bus.$off("itemImgLoad", this.itemImgListener);
   },
   created() {
     // 1.请求多个数据
@@ -143,11 +143,13 @@ export default {
       getHomeMultidata().then((res) => {
         this.banners = res.data.banner.list;
         this.recommends = res.data.recommend.list;
+        // console.log(res);
       });
     },
     getHomeGoods(type) {
       const page = this.goods[type].page + 1;
       getHomeGoods(type, page).then((res) => {
+        // console.log(res);
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
 

@@ -14,7 +14,7 @@ export const itemListenerMixin = {
     // 有可能在回调前，scroll为null，导致无法调用refresh
     this.refresh = debounce(this.$refs.scroll.refresh, 50);
 
-    // 对监听的时间进行保存
+    // 对监听的事件进行保存
     this.itemImgListener = () => {
       this.refresh();
     };
