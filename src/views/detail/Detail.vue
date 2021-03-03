@@ -121,29 +121,6 @@ export default {
       if (data.rate.cRate !== 0) {
         this.commentInfo = data.rate.list[0];
       }
-
-      // 1.第一次获取，获取到数据再回调，不行。
-      // 原因是$el还没渲染（即DOM还没渲染）
-      // this.themeTopYs = [];
-      // this.themeTopYs.push(0);
-      // this.themeTopYs.push(this.$refs.params.$el.offsetTop);
-      // this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
-      // this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
-      // console.log(this.themeTopYs);
-
-      this.$nextTick(() => {
-        // 第二次获取，值不对。
-        // 原因是只渲染了DOM，图片还没渲染完。
-        // 根据最新的数据，对应的DOM是已经被渲染出来的
-        // 但图片大概率还没加载完
-        // offsetTop值不对的时候，极大概率是因为图片需要时间加载的问题。
-        // this.themeTopYs = [];
-        // this.themeTopYs.push(0);
-        // this.themeTopYs.push(this.$refs.params.$el.offsetTop);
-        // this.themeTopYs.push(this.$refs.comment.$el.offsetTop);
-        // this.themeTopYs.push(this.$refs.recommend.$el.offsetTop);
-        // console.log(this.themeTopYs);
-      });
     });
 
     // 3.请求推荐数据
@@ -152,6 +129,7 @@ export default {
     });
 
     // 4.给getThemeTopY赋值（使用防抖）
+    // 在methods中无法给方法赋值，于是写在create中。
     this.getThemeTopY = debounce(() => {
       this.themeTopYs = [];
       this.themeTopYs.push(0);
@@ -167,6 +145,11 @@ export default {
       add: "addCart",
     }),
     detailImageLoad() {
+      //有两个bug，
+      //1.如果详情页快速点击切换类型会没有反应。
+      //2.如果快速下拉，可能会拉不动。
+      //只要数据来的速度大于用户的速度就没问题。
+      //这个bug先不管了。
       this.refresh();
 
       this.getThemeTopY();
@@ -209,7 +192,7 @@ export default {
         // }, 1500);
 
         // console.log(this.$toast);
-        this.$toast.show(res, 1000)
+        this.$toast.show(res, 1000);
       });
 
       // this.$store.dispatch("addCart", product).then((res) => {

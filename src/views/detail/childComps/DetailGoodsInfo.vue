@@ -34,9 +34,10 @@ export default {
   },
   methods: {
     imgLoad() {
-      // if (++this.counter === this.imagesLength) {
+      if (++this.counter === this.imagesLength) {
+        // 最后一张图片加载完，则发送事件。
         this.$emit("detailImageLoad");
-      // }
+      }
     },
   },
   watch: {
